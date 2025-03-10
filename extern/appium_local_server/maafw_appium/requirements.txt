@@ -1,0 +1,4 @@
+numpy>=1.21.0
+opencv-python>=4.5.0
+Appium-Python-Client>=2.11.1
+selenium>=4.9.0

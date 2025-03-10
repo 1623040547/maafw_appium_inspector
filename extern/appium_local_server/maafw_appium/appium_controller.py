@@ -34,21 +34,21 @@ class AppiumController(CustomController):
 
     @abstractmethod
     def touch_down(
-        self,
-        contact: int,
-        x: int,
-        y: int,
-        pressure: int,
+            self,
+            contact: int,
+            x: int,
+            y: int,
+            pressure: int,
     ) -> bool:
         raise NotImplementedError
 
     @abstractmethod
     def touch_move(
-        self,
-        contact: int,
-        x: int,
-        y: int,
-        pressure: int,
+            self,
+            contact: int,
+            x: int,
+            y: int,
+            pressure: int,
     ) -> bool:
         raise NotImplementedError
 
@@ -66,6 +66,18 @@ class AppiumController(CustomController):
 
     @abstractmethod
     def long_click(self, x: int, y: int, duration: float = 2.0) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def find_element_by_text(self, text: str) -> list[tuple[int, int, int, int]]:
+        """查找包含指定文本的元素并返回其坐标列表
+        
+        Args:
+            text: 要查找的文本
+            
+        Returns:
+            坐标列表 [(x1, y1), (x2, y2), ...]
+        """
         raise NotImplementedError
 
     def device_size(self) -> tuple[int, int]:

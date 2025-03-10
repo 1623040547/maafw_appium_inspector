@@ -1,6 +1,6 @@
-from appium_android_controller import AppiumAndroidController
 from maa.notification_handler import NotificationHandler, NotificationType
 import time
+from extern.appium_local_server.maafw_appium import AppiumAndroidController
 
 
 # 添加通知处理器
@@ -82,7 +82,7 @@ def run_pipeline(controller: AppiumAndroidController, buy_index: int):
     }
 
     # 运行流水线
-    result = controller.run_pipeline(pipeline=pipeline, resource_path="./resource")
+    result = controller.run_pipeline(pipeline=pipeline, resource_path="../maafw_appium/resource")
     print(f"任务执行结果: {result}")
 
 
@@ -93,7 +93,7 @@ if __name__ == "__main__":
         "appium:automationName": "UiAutomator2",
         "appium:deviceName": "荣耀畅玩60 Plus",  # 或具体设备名称
         "appium:platformVersion": "14",  # 替换为实际的 Android 版本
-        "appium:appPackage": "com.serenity.relax",  # 替换为实际的应用包名
+        "appium:appPackage": "",  # 替换为实际的应用包名
         "appium:appActivity": ".MainActivity",  # 替换为实际的主活动名
         "appium:noReset": True,
         "appium:newCommandTimeout": 60,

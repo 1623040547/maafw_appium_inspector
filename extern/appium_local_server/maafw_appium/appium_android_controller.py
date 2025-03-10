@@ -1,17 +1,18 @@
 from appium import webdriver
 import numpy as np
 from maa.notification_handler import NotificationHandler
-import cv2
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.actions import interaction
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver.common.actions.pointer_input import PointerInput
 from typing import Dict, Any
 from appium.options.android import UiAutomator2Options
+import cv2
 
 from maa.resource import Resource
 from maa.tasker import Tasker
-from .custom_actions import LongPressAction, RecNext, RatioPanel, AppBack
+from .custom_actions import LongPressAction, RecNext, RatioPanel, AppBack, ForEach, FindText
+
 from .appium_controller import AppiumController
 
 
@@ -98,15 +99,21 @@ class AppiumAndroidController(AppiumController):
     def screencap(self) -> np.ndarray:
         print("screencap start")
         try:
+            # 获取截图
             screenshot = self.driver.get_screenshot_as_png()
+            # 直接将PNG转换为numpy数组
             image_array = cv2.imdecode(
                 np.frombuffer(screenshot, np.uint8), cv2.IMREAD_COLOR
             )
+
+            # 计算目标尺寸（竖屏应用，以宽度为短边）
             target_w = self.device_width
             target_h = int(self.device_height * self.device_width / self.device_width)
+
             image_array = cv2.resize(
                 image_array, (target_w, target_h), interpolation=cv2.INTER_LANCZOS4
             )
+
             return image_array
         except Exception as e:
             print(f"Screenshot failed: {e}")
@@ -232,6 +239,8 @@ class AppiumAndroidController(AppiumController):
             resource.register_custom_action("RecNext", RecNext(self))
             resource.register_custom_action("RatioPanel", RatioPanel(self))
             resource.register_custom_action("AppBack", AppBack(self))
+            resource.register_custom_action("ForEach", ForEach(self))
+            resource.register_custom_recognition("FindText", FindText(self))
 
             res_job = resource.post_bundle(resource_path)
             result = res_job.wait()
@@ -272,3 +281,34 @@ class AppiumAndroidController(AppiumController):
             return True
         except Exception:
             return False
+
+    def find_element_by_text(self, text: str) -> list[tuple[int, int, int, int]]:
+        print(f"Finding elements with text: {text}")
+        try:
+            # 使用 UiSelector 查找包含文本的元素
+            elements = self.driver.find_elements(
+                "android uiautomator",
+                f'new UiSelector().textContains("{text}")'
+            )
+            positions = []
+
+            for element in elements:
+                try:
+                    # 获取元素位置和大小
+                    location = element.location
+                    size = element.size
+
+                    # 提取位置信息
+                    x = int(location['x'])
+                    y = int(location['y'])
+                    w = int(size['width'])
+                    h = int(size['height'])
+
+                    positions.append((x, y, w, h))
+                except:
+                    continue
+
+            return positions
+        except Exception as e:
+            print(f"Find elements by text failed: {e}")
+            return []

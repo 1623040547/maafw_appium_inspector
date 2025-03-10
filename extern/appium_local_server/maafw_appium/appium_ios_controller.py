@@ -12,7 +12,7 @@ from typing import Dict, Any
 from maa.resource import Resource
 from maa.tasker import Tasker
 from .appium_controller import AppiumController
-from .custom_actions import LongPressAction, RecNext, RatioPanel, AppBack
+from .custom_actions import LongPressAction, RecNext, RatioPanel, AppBack, ForEach, FindText
 
 
 class AppiumIOSController(AppiumController):
@@ -246,6 +246,8 @@ class AppiumIOSController(AppiumController):
             resource.register_custom_action("RecNext", RecNext(self))
             resource.register_custom_action("RatioPanel", RatioPanel(self))
             resource.register_custom_action("AppBack", AppBack(self))
+            resource.register_custom_action("ForEach", ForEach(self))
+            resource.register_custom_recognition("FindText", FindText(self))
 
             # 加载资源
             res_job = resource.post_bundle(resource_path)
@@ -292,3 +294,31 @@ class AppiumIOSController(AppiumController):
             return True
         except Exception:
             return False
+
+    def find_element_by_text(self, text: str) -> list[tuple[int, int, int, int]]:
+        print(f"Finding elements with text: {text}")
+        try:
+            # 使用 XPath 查找包含文本的元素
+            elements = self.driver.find_elements("xpath", f"//*[contains(@label, '{text}') or contains(@name, '{text}') or contains(@value, '{text}')]")
+            positions = []
+            
+            for element in elements:
+                try:
+                    # 获取元素位置和大小
+                    location = element.location
+                    size = element.size
+                    
+                    # 提取位置信息
+                    x = int(location['x'])
+                    y = int(location['y'])
+                    w = int(size['width'])
+                    h = int(size['height'])
+                    
+                    positions.append((x, y, w, h))
+                except:
+                    continue
+                    
+            return positions
+        except Exception as e:
+            print(f"Find elements by text failed: {e}")
+            return []
